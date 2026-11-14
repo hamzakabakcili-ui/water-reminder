@@ -9,6 +9,22 @@ A lightweight macOS reminder that nudges you to drink water and refill your ther
 
 **Hafta içi mesai boyunca su içmeyi ve termosu doldurmayı hatırlatan, tamamen yerel çalışan küçük bir macOS uygulaması.**
 
+<p align="center">
+  <img src="docs/screenshot.png" alt="Water Reminder popup" width="460">
+</p>
+
+## Quick start (English)
+
+```bash
+git clone https://github.com/hamzakabakcili-ui/water-reminder.git
+cd water-reminder
+python3 su_hatirlatici.py --test               # preview one reminder
+python3 su_hatirlatici.py                      # run (weekdays 09:30-18:00)
+python3 su_hatirlatici.py --install-autostart  # start at login (launchd)
+```
+
+Requires macOS and Python 3.9+. Defaults (work hours, 2.5 L goal, 30-minute interval, 0.5 L thermos) are constants at the top of `su_hatirlatici.py`. UI text is in Turkish.
+
 ## Özellikler
 
 - Hafta içi (Pazartesi–Cuma) 09:30–18:00 arasında çalışır, hafta sonu susar.
