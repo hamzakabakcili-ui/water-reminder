@@ -20,14 +20,14 @@ python3 -m unittest tests.test_su_hatirlatici.RemindTests.test_snooze_changes_no
 rm ~/.su_hatirlatici.json                      # reset today's state (--test records a real 150 ml sip)
 ```
 
-Popup alone: `osascript -l JavaScript popup.js "<message>" <timeout_s> <button1> [button2 ...]` prints the pressed button's title to stdout, and nothing on timeout.
+Popup alone: `osascript -l JavaScript popup.js <theme su|doldur|ozet> "<message>" <timeout_s> <button1> [button2 ...]` prints the pressed button's title to stdout, and nothing on timeout.
 
 ## Architecture
 
 Two files that must stay side by side:
 
 - `su_hatirlatici.py` — scheduler and state. All tunables (hours, goal, sip size, interval, snooze, thermos size) are constants at the top. `run()` polls every 20 s; `in_hours()` gates on weekday and time; `remind()` decides between a "drink" prompt and a "thermos empty, refill" prompt from the tracked `thermos` level. State (`date`, `drunk`, `thermos`) lives in `~/.su_hatirlatici.json` and resets when the date changes; the thermos is assumed empty at the start of each day. An end-of-day summary popup fires once after `END` on workdays.
-- `popup.js` — a JXA (AppKit via `osascript -l JavaScript`) floating `NSPanel` anchored bottom-right of the main screen's `visibleFrame`. `ask()` in the Python file shells out to it and treats empty stdout as "ignored/snoozed". Window size is the `W`/`H` constants.
+- `popup.js` — a JXA (AppKit via `osascript -l JavaScript`) borderless, colored floating `NSPanel` anchored bottom-right of the main screen's `visibleFrame`. Message convention: first line = title, a line starting with `Bugün:` containing `X / Y` drives the progress bar, remaining lines = body; keep titles short (one line, no wrapping). Theme picks color/icon. `ask()` in the Python file shells out to it and treats empty stdout as "ignored/snoozed". Window size is the `W`/`H` constants. JXA doesn't expose `NSAttributedString` initializers and offscreen render skips layer-backed subviews, so bars/button backgrounds are `NSBox` and button text color uses `contentTintColor`.
 
 ## Tests
 

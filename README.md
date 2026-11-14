@@ -10,7 +10,7 @@ A lightweight macOS reminder that nudges you to drink water and refill your ther
 **Hafta içi mesai boyunca su içmeyi ve termosu doldurmayı hatırlatan, tamamen yerel çalışan küçük bir macOS uygulaması.**
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="Water Reminder popup" width="460">
+  <img src="docs/screenshot.png" alt="Water Reminder popup" width="480">
 </p>
 
 ## Quick start (English)
@@ -28,7 +28,7 @@ Requires macOS and Python 3.9+. Defaults (work hours, 2.5 L goal, 30-minute inte
 ## Özellikler
 
 - Hafta içi (Pazartesi–Cuma) 09:30–18:00 arasında çalışır, hafta sonu susar.
-- Her 30 dakikada bir, ekranın **sağ altında** küçük bir pencere açar. Klavye odağını asla almaz: yazarken tuşların hepsi kendi uygulamana gider, bip sesi çıkmaz.
+- Her 30 dakikada bir, ekranın **sağ altında** renkli, dikkat çekici bir kart açar (su içme mavi, termos doldurma turuncu, gün sonu özeti yeşil; günlük hedefe ilerleme çubuğu gösterir). Klavye odağını asla almaz: yazarken tuşların hepsi kendi uygulamana gider, bip sesi çıkmaz.
 - Termosun içindeki miktarı takip eder ve bittiğinde "doldur" der.
 - Günlük hedefe (varsayılan 2,5 L) ilerlemeyi gösterir, gün sonunda özet verir.
 - Hiçbir şey kurmanız gerekmez: sadece Python 3 ve macOS'un kendi araçlarını kullanır.

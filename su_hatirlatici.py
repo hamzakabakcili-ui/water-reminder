@@ -51,10 +51,14 @@ def save_state(s):
         pass
 
 
-def ask(message, buttons, default):
-    """Sağ altta küçük pencere (popup.js). Seçilen butonu döndürür, zaman aşımında None."""
+def ask(message, buttons, default, theme="su"):
+    """Sağ altta bildirim kartı (popup.js). Seçilen butonu döndürür, zaman aşımında None.
+
+    theme: "su" (mavi), "doldur" (turuncu), "ozet" (yeşil). `default` artık kullanılmıyor
+    (pencere klavye odağı almadığı için Enter ile seçim yok).
+    """
     r = subprocess.run(
-        ["osascript", "-l", "JavaScript", str(POPUP_JS), message,
+        ["osascript", "-l", "JavaScript", str(POPUP_JS), theme, message,
          str(DIALOG_TIMEOUT_S)] + buttons,
         capture_output=True, text=True)
     return r.stdout.strip() or None
@@ -68,8 +72,8 @@ def remind(s):
     """Bir hatırlatma gösterir. True dönerse içildi, False ise ertelendi."""
     need_fill = s["thermos"] < SIP_ML
     if need_fill:
-        msg = "Termos bitti. Sebilden doldur ve su iç.\n\n" + progress(s)
-        choice = ask(msg, ["Ertele", "Doldurdum, içtim"], "Doldurdum, içtim")
+        msg = "Termos bitti!\nSebilden doldur ve su iç.\n\n" + progress(s)
+        choice = ask(msg, ["Ertele", "Doldurdum, içtim"], "Doldurdum, içtim", "doldur")
         if choice == "Doldurdum, içtim":
             s["thermos"] = THERMOS_ML
         else:
@@ -123,9 +127,9 @@ def run(test=False):
             if is_workday(now) and now.time() >= END and summary_day != s["date"]:
                 summary_day = s["date"]
                 ok = s["drunk"] >= GOAL_ML
-                ask("%s\n\n%s" % ("Hedefe ulaştın, aferin! 🎉" if ok
-                                  else "Hedefe ulaşamadın. Akşam biraz daha su iç.",
-                                  progress(s)), ["Tamam"], "Tamam")
+                ask("%s\n\n%s" % ("Hedefe ulaştın, aferin!" if ok
+                                  else "Hedefe ulaşamadın\nAkşam biraz daha su iç.",
+                                  progress(s)), ["Tamam"], "Tamam", "ozet" if ok else "su")
             due = next_start(now)
         time.sleep(20)
 
