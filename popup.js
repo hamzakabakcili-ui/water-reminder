@@ -57,12 +57,13 @@ function run(argv) {
     btn.bezelStyle = 1;
     btn.target = handler;
     btn.action = 'click:';
-    if (i === buttons.length - 1) btn.keyEquivalent = '\r';
     win.contentView.addSubview(btn);
   });
 
+  // Klavye odağını asla alma: kullanıcı yazarken tuşlar kendi uygulamasına gitsin
+  // (odak alırsa tuşlar bu pencereye düşer ve bip sesi çıkar). Sadece fare ile kullanılır.
+  win.becomesKeyOnlyIfNeeded = true;
   win.orderFrontRegardless;
-  win.makeKeyAndOrderFront(null);
 
   $.NSTimer.scheduledTimerWithTimeIntervalRepeatsBlock(timeout, false, function () {
     $.exit(0);

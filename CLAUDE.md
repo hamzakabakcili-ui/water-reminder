@@ -35,6 +35,8 @@ Two files that must stay side by side:
 
 ## Gotchas
 
+- The popup must never take keyboard focus (`becomesKeyOnlyIfNeeded`, no `makeKeyAndOrderFront`, no Enter key equivalent). If it becomes the key window, the user's typing goes to it and macOS beeps. It is mouse-only by design.
+
 - Tkinter is not usable here: system Tk crashes on this macOS version ("macOS 14 (1408) or later required"). That's why the popup is JXA rather than Python GUI.
 - The native `display dialog` was rejected because it can't be positioned; keep the custom panel.
 - The popup process exits via `$.exit(0)` from the button handler or a timeout timer; button identity is passed back only through stdout, so keep button titles in sync with the string comparisons in `remind()` ("İçtim", "Ertele", "Doldurdum, içtim").

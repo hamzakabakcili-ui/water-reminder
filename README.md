@@ -28,7 +28,7 @@ Requires macOS and Python 3.9+. Defaults (work hours, 2.5 L goal, 30-minute inte
 ## Özellikler
 
 - Hafta içi (Pazartesi–Cuma) 09:30–18:00 arasında çalışır, hafta sonu susar.
-- Her 30 dakikada bir, ekranın **sağ altında** küçük bir pencere açar. Yazdığın şeyi bölmez, odağı çalmaz.
+- Her 30 dakikada bir, ekranın **sağ altında** küçük bir pencere açar. Klavye odağını asla almaz: yazarken tuşların hepsi kendi uygulamana gider, bip sesi çıkmaz.
 - Termosun içindeki miktarı takip eder ve bittiğinde "doldur" der.
 - Günlük hedefe (varsayılan 2,5 L) ilerlemeyi gösterir, gün sonunda özet verir.
 - Hiçbir şey kurmanız gerekmez: sadece Python 3 ve macOS'un kendi araçlarını kullanır.
@@ -50,7 +50,7 @@ python3 su_hatirlatici.py --install-autostart  # oturum açılınca otomatik ba�
 python3 su_hatirlatici.py --uninstall-autostart
 ```
 
-Pencerede iki buton var: **İçtim** (varsayılan, Enter ile basılır) ve **Ertele** (5 dk sonra tekrar sorar). 90 saniye cevap verilmezse pencere kapanır ve ertelenmiş sayılır.
+Pencerede iki buton var: **İçtim** ve **Ertele** (fareyle tıklanır) (5 dk sonra tekrar sorar). 90 saniye cevap verilmezse pencere kapanır ve ertelenmiş sayılır.
 
 ## Ayarlar
 
