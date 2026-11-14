@@ -1,6 +1,6 @@
 # 💧 Water Reminder
 
-[![CI](https://github.com/hamakabakcili/water-reminder/actions/workflows/ci.yml/badge.svg)](https://github.com/hamakabakcili/water-reminder/actions/workflows/ci.yml)
+[![CI](https://github.com/hamzakabakcili-ui/water-reminder/actions/workflows/ci.yml/badge.svg)](https://github.com/hamzakabakcili-ui/water-reminder/actions/workflows/ci.yml)
 ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
 ![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
@@ -25,7 +25,7 @@ A lightweight macOS reminder that nudges you to drink water and refill your ther
 ## Kullanım
 
 ```bash
-git clone https://github.com/hamakabakcili/water-reminder.git
+git clone https://github.com/hamzakabakcili-ui/water-reminder.git
 cd water-reminder
 
 python3 su_hatirlatici.py                      # çalıştır
