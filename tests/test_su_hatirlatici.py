@@ -117,6 +117,49 @@ class RemindTests(unittest.TestCase):
         self.assertEqual(s["thermos"], m.SIP_ML - 1)
 
 
+class FirstRunTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        for name, val in (("SETTINGS_FILE", Path(self.tmp.name) / "ayar.json"),):
+            p = mock.patch.object(m, name, val)
+            p.start()
+            self.addCleanup(p.stop)
+        p = mock.patch.object(m, "STATE_FILE", Path(self.tmp.name) / "durum.json")
+        p.start()
+        self.addCleanup(p.stop)
+        p = mock.patch.object(m, "skip_today")
+        self.skip = p.start()
+        self.addCleanup(p.stop)
+        p = mock.patch.object(m, "ask")
+        self.ask = p.start()
+        self.addCleanup(p.stop)
+
+    def test_answered_saves_and_skips_today(self):
+        with mock.patch.object(m, "first_run_setup", side_effect=lambda: m.SETTINGS_FILE.write_text("{}") or True):
+            m.ensure_first_run_setup()
+        self.skip.assert_called_once()
+
+    def test_answered_but_already_drank_today_does_not_skip(self):
+        m.STATE_FILE.write_text(json.dumps({"date": dt.date.today().isoformat(), "drunk": 300, "thermos": 200}))
+        with mock.patch.object(m, "first_run_setup", side_effect=lambda: m.SETTINGS_FILE.write_text("{}") or True):
+            m.ensure_first_run_setup()
+        self.skip.assert_not_called()
+
+    def test_cancelled_writes_defaults_and_does_not_skip(self):
+        with mock.patch.object(m, "first_run_setup", return_value=False):
+            m.ensure_first_run_setup()
+        self.assertEqual(json.loads(m.SETTINGS_FILE.read_text()), m.DEFAULTS)
+        self.skip.assert_not_called()
+
+    def test_existing_settings_never_asks(self):
+        m.SETTINGS_FILE.write_text("{}")
+        with mock.patch.object(m, "first_run_setup") as q:
+            m.ensure_first_run_setup()
+        q.assert_not_called()
+        self.skip.assert_not_called()
+
+
 class SettingsTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

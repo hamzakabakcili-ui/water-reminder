@@ -32,7 +32,9 @@ Two files that must stay side by side:
 
 ## First-run setup
 
-`--install-autostart` on a fresh install (no `~/.su_hatirlatici_ayar.json`) calls `first_run_setup()`: four `popup.js` cards (theme `kurulum`, mouse-only choice buttons, progress via an `Adım: X / Y` line; the last button, prefixed `✓`, is the current default) ask goal, start, end and vessel size, then a summary card. Answers are saved, `skip_today()` is set so reminders begin the next workday, and only then is the launchd agent loaded. Unanswered (5 min timeout) = defaults, no skip. It works from non-interactive shells (Claude Code) since it only needs the screen. Custom values outside the offered choices go through `--ayarla`.
+`ensure_first_run_setup()` runs from `--install-autostart` (before the launchd agent is loaded) and from a plain `python3 su_hatirlatici.py` (arg == "", which is also how launchd starts it; not for `--test`). It only acts when `~/.su_hatirlatici_ayar.json` is missing. `first_run_setup()` shows four `popup.js` cards (theme `kurulum`, mouse-only choice buttons, progress via an `Adım: X / Y` line; the last button, prefixed `✓`, is the current default) for goal, start, end and vessel size, then a summary card. Answers are saved; if nothing has been drunk today, `skip_today()` is set so reminders begin the next workday. Unanswered (5 min timeout) writes `DEFAULTS` to the settings file (so it never asks again at the next launchd start) and does not skip today. It works from non-interactive shells (Claude Code) since it only needs the screen. Custom values outside the offered choices go through `--ayarla`.
+
+The background process loads code at start: after changing `su_hatirlatici.py`, restart it with `launchctl kickstart -k gui/$(id -u)/local.su-hatirlatici`, or the old code keeps running.
 
 ## Tests
 

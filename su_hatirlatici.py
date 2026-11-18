@@ -288,6 +288,34 @@ def first_run_setup():
     return True
 
 
+def ensure_first_run_setup():
+    """Ayar dosyası yoksa (ilk kullanım) soruları sorar. Cevaplanırsa bugün susturulur ve
+    hatırlatmalar bir sonraki iş gününden başlar. Cevaplanmazsa varsayılanlar kaydedilir
+    (soru her açılışta tekrar çıkmasın diye); sonradan --ayarla ile değişir."""
+    if SETTINGS_FILE.exists():
+        return
+    if first_run_setup():
+        fresh = load_state()["drunk"] == 0  # bugün su kaydedilmişse (mevcut kullanıcı) susturma
+        if fresh:
+            skip_today()
+        apply_settings()
+        print("Ayarlar kaydedildi: hedef %.1f L, %s–%s, kap %d ml."
+              % (GOAL_ML / 1000, START.strftime("%H:%M"), END.strftime("%H:%M"), THERMOS_ML))
+        if fresh:
+            print("Hatırlatmalar bugün değil, bir sonraki iş gününden başlayacak.")
+        ask("Hazır!\nHedef %.1f L · %s–%s · kap %d ml\n%s\nDeğiştirmek için: --ayarla"
+            % (GOAL_ML / 1000, START.strftime("%H:%M"), END.strftime("%H:%M"), THERMOS_ML,
+               "Hatırlatmalar bir sonraki iş gününden itibaren başlar." if fresh
+               else "Hatırlatmalar kaldığı yerden devam eder."),
+            ["Tamam"], None, theme="ozet", timeout=30)
+    else:
+        try:
+            SETTINGS_FILE.write_text(json.dumps(DEFAULTS))
+        except OSError:
+            pass
+        print("Ayar soruları cevaplanmadı; varsayılanlar geçerli. Sonra: python3 su_hatirlatici.py --ayarla")
+
+
 def install_autostart():
     plist = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -299,21 +327,7 @@ def install_autostart():
 <key>KeepAlive</key><true/>
 </dict></plist>
 """
-    # İlk kurulum: ayarlar sorulur; tamamlanınca sayaç bugün değil ertesi iş gününden başlar.
-    # Arka plan süreci yüklenmeden önce yapılır; böylece skip işareti süreç başlarken hazır olur.
-    first = not SETTINGS_FILE.exists()
-    if first and first_run_setup():
-        skip_today()
-        apply_settings()
-        print("Ayarlar kaydedildi: hedef %.1f L, %s–%s, kap %d ml."
-              % (GOAL_ML / 1000, START.strftime("%H:%M"), END.strftime("%H:%M"), THERMOS_ML))
-        print("Hatırlatmalar bugün değil, bir sonraki gün başlayacak.")
-        ask("Hazır!\nHedef %.1f L · %s–%s · kap %d ml\nHatırlatmalar bir sonraki iş gününden itibaren başlar.\n"
-            "Değiştirmek için: --ayarla"
-            % (GOAL_ML / 1000, START.strftime("%H:%M"), END.strftime("%H:%M"), THERMOS_ML),
-            ["Tamam"], None, theme="ozet", timeout=30)
-    elif first:
-        print("Ayar soruları iptal edildi; varsayılanlar geçerli. Sonra: python3 su_hatirlatici.py --ayarla")
+    ensure_first_run_setup()  # arka plan süreci yüklenmeden önce
     PLIST.parent.mkdir(parents=True, exist_ok=True)
     PLIST.write_text(plist)
     subprocess.run(["launchctl", "unload", str(PLIST)], capture_output=True)
@@ -338,6 +352,8 @@ if __name__ == "__main__":
     elif arg == "--uninstall-autostart":
         uninstall_autostart()
     else:
+        if arg == "":
+            ensure_first_run_setup()  # düz çalıştırmada da (ve launchd'de) ilk kullanımda sor
         try:
             run(test=(arg == "--test"))
         except KeyboardInterrupt:
