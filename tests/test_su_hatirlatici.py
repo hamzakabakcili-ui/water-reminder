@@ -94,6 +94,22 @@ class RemindTests(unittest.TestCase):
         self.assertEqual(s["thermos"], m.THERMOS_ML - m.SIP_ML)
         self.assertEqual(s["drunk"], m.SIP_ML)
 
+    def test_refill_credits_leftover_water(self):
+        s = self.state(50)
+        with mock.patch.object(m, "ask", return_value="Doldurdum, içtim"):
+            m.remind(s)
+        self.assertEqual(s["drunk"], 50 + m.SIP_ML)
+
+    def test_five_thermoses_equal_goal(self):
+        s = self.state(0)
+        def press(msg, buttons, *a, **k):
+            return buttons[-1]  # her zaman olumlu butona bas
+        with mock.patch.object(m, "ask", side_effect=press), \
+                mock.patch.object(m, "save_state"):
+            for _ in range(5 * 3):  # termos başına 3 hatırlatma (150+150+200)
+                m.remind(s)
+        self.assertEqual((s["drunk"], s["thermos"]), (2500, 0))
+
     def test_refill_snooze_keeps_thermos_empty(self):
         s = self.state(m.SIP_ML - 1)
         with mock.patch.object(m, "ask", return_value="Ertele"):

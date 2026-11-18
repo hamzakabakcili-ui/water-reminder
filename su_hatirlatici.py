@@ -7,6 +7,7 @@ Kullanım:
     python3 su_hatirlatici.py                    # çalıştır
     python3 su_hatirlatici.py --test             # hemen bir hatırlatma göster
     python3 su_hatirlatici.py --install-autostart  # oturum açılınca otomatik başlat
+    python3 su_hatirlatici.py --skip-today       # sadece bugün için sustur
     python3 su_hatirlatici.py --uninstall-autostart
 """
 import datetime as dt
@@ -68,6 +69,12 @@ def progress(s):
     return "Bugün: %.1f / %.1f L" % (s["drunk"] / 1000, GOAL_ML / 1000)
 
 
+def next_sip(thermos):
+    """Bu hatırlatmada içilecek miktar. Termosta bir sonraki yudumluk kalmayacaksa
+    kalanın hepsi içilir; böylece termos tam 3 hatırlatmada biter (150+150+200)."""
+    return thermos if thermos - SIP_ML < SIP_ML else SIP_ML
+
+
 def remind(s):
     """Bir hatırlatma gösterir. True dönerse içildi, False ise ertelendi."""
     need_fill = s["thermos"] < SIP_ML
@@ -75,16 +82,19 @@ def remind(s):
         msg = "Termos bitti!\nSebilden doldur ve su iç.\n\n" + progress(s)
         choice = ask(msg, ["Ertele", "Doldurdum, içtim"], "Doldurdum, içtim", "doldur")
         if choice == "Doldurdum, içtim":
+            s["drunk"] += s["thermos"]  # kalan azıcık su da içilmiş sayılır
             s["thermos"] = THERMOS_ML
         else:
             return False
     else:
-        msg = "Birkaç yudum su iç (~%d ml).\nTermosta ~%d ml var.\n\n%s" % (
-            SIP_ML, s["thermos"], progress(s))
+        sip = next_sip(s["thermos"])
+        msg = "Birkaç yudum su iç (~%d ml).\nTermosta şu an ~%d ml var, içince ~%d kalır.\n\n%s" % (
+            sip, s["thermos"], s["thermos"] - sip, progress(s))
         if ask(msg, ["Ertele", "İçtim"], "İçtim") != "İçtim":
             return False
-    s["thermos"] -= SIP_ML
-    s["drunk"] += SIP_ML
+    sip = next_sip(s["thermos"])
+    s["thermos"] -= sip
+    s["drunk"] += sip
     save_state(s)
     return True
 
@@ -116,9 +126,11 @@ def run(test=False):
     summary_day = None
     while True:
         now = dt.datetime.now()
-        if now.date().isoformat() != s["date"]:
-            s = load_state()
-        if in_hours(now):
+        s = load_state()  # her turda oku: --skip-today dışarıdan yazabilir
+        if s.get("skip"):
+            due = next_start(now)
+            summary_day = s["date"]  # bugünün özeti de gösterilmesin
+        elif in_hours(now):
             if now >= due and s["drunk"] < GOAL_ML:
                 drank = remind(s)
                 delay = INTERVAL_MIN if drank else SNOOZE_MIN
@@ -132,6 +144,13 @@ def run(test=False):
                                   progress(s)), ["Tamam"], "Tamam", "ozet" if ok else "su")
             due = next_start(now)
         time.sleep(20)
+
+
+def skip_today():
+    s = load_state()
+    s["skip"] = True
+    save_state(s)
+    print("Bugün için hatırlatmalar kapatıldı.")
 
 
 def install_autostart():
@@ -162,6 +181,8 @@ if __name__ == "__main__":
     arg = sys.argv[1] if len(sys.argv) > 1 else ""
     if arg == "--install-autostart":
         install_autostart()
+    elif arg == "--skip-today":
+        skip_today()
     elif arg == "--uninstall-autostart":
         uninstall_autostart()
     else:
