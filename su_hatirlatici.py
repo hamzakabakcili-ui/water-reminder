@@ -152,8 +152,13 @@ def ask(message, buttons, default, theme="su", timeout=None):
     return r.stdout.strip() or None
 
 
+def fmt_l(ml):
+    """Litre gösterimi; 50 ml'lik adımlar yuvarlanıp yanıltmasın diye gerekirse 2 ondalık (0.85)."""
+    return ("%.1f" if ml % 100 == 0 else "%.2f") % (ml / 1000)
+
+
 def progress(s):
-    return "Bugün: %.1f / %.1f L" % (s["drunk"] / 1000, GOAL_ML / 1000)
+    return "Bugün: %s / %s L" % (fmt_l(s["drunk"]), fmt_l(GOAL_ML))
 
 
 def next_sip(thermos):
