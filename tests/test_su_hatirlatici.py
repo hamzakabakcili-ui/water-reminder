@@ -117,5 +117,43 @@ class RemindTests(unittest.TestCase):
         self.assertEqual(s["thermos"], m.SIP_ML - 1)
 
 
+class SettingsTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        p = mock.patch.object(m, "SETTINGS_FILE", Path(self.tmp.name) / "ayar.json")
+        p.start()
+        self.addCleanup(p.stop)
+        # modül sabitleri testten sonra eski haline dönsün
+        for n in ("START", "END", "GOAL_ML", "THERMOS_ML", "SIP_ML", "INTERVAL_MIN"):
+            q = mock.patch.object(m, n, getattr(m, n))
+            q.start()
+            self.addCleanup(q.stop)
+
+    def test_defaults_keep_30_minutes(self):
+        m.apply_settings()
+        self.assertEqual((m.GOAL_ML, m.THERMOS_ML, m.INTERVAL_MIN), (2500, 500, 30))
+
+    def test_configure_applies_choices(self):
+        m.configure(["--hedef-litre", "3", "--baslangic", "08:00",
+                     "--bitis", "17:00", "--kap-ml", "330"])
+        self.assertEqual((m.GOAL_ML, m.THERMOS_ML), (3000, 330))
+        self.assertEqual((m.START, m.END), (dt.time(8, 0), dt.time(17, 0)))
+        self.assertEqual(m.INTERVAL_MIN, 540 // 20)  # 3000/150 = 20 hatırlatma
+
+    def test_small_vessel_caps_sip(self):
+        m.configure(["--kap-ml", "120"])
+        self.assertEqual(m.SIP_ML, 120)
+
+    def test_invalid_settings_rejected(self):
+        with self.assertRaises(SystemExit):
+            m.configure(["--baslangic", "18:00", "--bitis", "09:00"])
+        self.assertFalse(m.SETTINGS_FILE.exists())
+
+    def test_corrupt_file_falls_back_to_defaults(self):
+        m.SETTINGS_FILE.write_text("{bozuk")
+        self.assertEqual(m.load_settings(), m.DEFAULTS)
+
+
 if __name__ == "__main__":
     unittest.main()

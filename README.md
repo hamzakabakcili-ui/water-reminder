@@ -54,16 +54,20 @@ Pencerede iki buton var: **İçtim** ve **Ertele** (fareyle tıklanır) (5 dk so
 
 ## Ayarlar
 
-Tüm ayarlar [`su_hatirlatici.py`](su_hatirlatici.py) dosyasının en üstündeki sabitlerdedir:
+Üç şeyi kendinize göre seçebilirsiniz: **günlük hedef**, **hatırlatma saat aralığı** ve **termos/bardak büyüklüğü**.
 
-| Ayar | Varsayılan | Açıklama |
-|------|-----------|----------|
-| `START` / `END` | 09:30 / 18:00 | Mesai saatleri |
-| `GOAL_ML` | 2500 | Günlük hedef (ml) |
-| `SIP_ML` | 150 | Her hatırlatmada içilecek miktar |
-| `INTERVAL_MIN` | 30 | Hatırlatma aralığı (dk) |
-| `SNOOZE_MIN` | 5 | Ertele süresi (dk) |
-| `THERMOS_ML` | 500 | Termos hacmi |
+```bash
+python3 su_hatirlatici.py --ayarla    # sorularla seç (boş bırakırsan mevcut değer kalır)
+
+# ya da tek satırda:
+python3 su_hatirlatici.py --ayarla --hedef-litre 3 --baslangic 08:30 --bitis 17:00 --kap-ml 330
+```
+
+`--install-autostart` ilk kurulumda bu soruları ekranda açılan pencerelerle sorar (terminal gerekmez, Claude Code ile kurulumda da çıkar). Cevaplar kaydedilince hatırlatmalar bugün değil, bir sonraki günden başlar.
+
+Seçimler `~/.su_hatirlatici_ayar.json` dosyasına kaydedilir. Çalışan hatırlatıcı yeniden başlatmadan birkaç saniye içinde yeni ayarı alır. Hatırlatma aralığı sizin için otomatik hesaplanır: hedefe mesai bitmeden ulaşacak şekilde (varsayılanda 30 dk, en az 10, en çok 60 dk). Bardak 150 ml'den küçükse yudum bardak kadar olur.
+
+Diğer sabitler (`SIP_ML`, `SNOOZE_MIN`) hâlâ [`su_hatirlatici.py`](su_hatirlatici.py) dosyasının en üstündedir.
 
 Günlük ilerleme `~/.su_hatirlatici.json` dosyasında tutulur ve her gün sıfırlanır.
 

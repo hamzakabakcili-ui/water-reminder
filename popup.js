@@ -1,8 +1,8 @@
 // Sağ altta renkli, dikkat çekici ama odak ÇALMAYAN bir bildirim kartı gösterir
 // (su_hatirlatici.py tarafından çağrılır).
 // Kullanım: osascript -l JavaScript popup.js <tema> <mesaj> <zamanaşımı_sn> <buton1> [buton2 ...]
-//   tema: su (mavi) | doldur (turuncu) | ozet (yeşil)
-//   mesaj: ilk satır başlık, "Bugün: X / Y L" içeren satır ilerleme çubuğu, kalanı gövde metni
+//   tema: su (mavi) | doldur (turuncu) | ozet (yeşil) | kurulum (mor, kurulum soruları)
+//   mesaj: ilk satır başlık, "Bugün: X / Y L" ya da "Adım: X / Y" içeren satır ilerleme çubuğu, kalanı gövde metni
 // Basılan butonun adını stdout'a yazar; zaman aşımında hiçbir şey yazmaz.
 ObjC.import('Cocoa');
 ObjC.import('stdlib');
@@ -11,6 +11,7 @@ const THEMES = {
   su:     { color: [0.04, 0.45, 0.95], icon: '💧' },
   doldur: { color: [0.96, 0.46, 0.05], icon: '🚰' },
   ozet:   { color: [0.10, 0.62, 0.35], icon: '🎉' },
+  kurulum:{ color: [0.42, 0.30, 0.85], icon: '⚙️' },
 };
 
 function emit(text) {
@@ -48,7 +49,7 @@ function run(argv) {
   const buttons = argv.slice(3);
 
   const title = lines[0];
-  const progressLine = lines.find(function (l) { return /^Bugün:/.test(l); }) || '';
+  const progressLine = lines.find(function (l) { return /^(Bugün|Adım):/.test(l); }) || '';
   const body = lines.slice(1).filter(function (l) { return l !== progressLine && l.trim() !== ''; }).join('\n');
   const m = progressLine.match(/([\d.]+)\s*\/\s*([\d.]+)/);
   const fraction = m ? Math.max(0, Math.min(1, parseFloat(m[1]) / parseFloat(m[2]))) : 0;
